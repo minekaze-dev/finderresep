@@ -42,6 +42,20 @@ const twoRecipesSchema = {
     }
 };
 
+/**
+ * Membersihkan string JSON mentah yang mungkin dibungkus dalam blok kode Markdown.
+ * @param rawText Teks mentah dari respons AI.
+ * @returns String JSON yang sudah bersih.
+ */
+const cleanJsonString = (rawText: string): string => {
+  const match = rawText.match(/```json\s*([\s\S]*?)\s*```/);
+  if (match && match[1]) {
+    return match[1];
+  }
+  return rawText.trim();
+};
+
+
 export const generateRecipesAndImages = async (ingredients: string): Promise<Recipe[]> => {
   try {
     // 1. Generate two recipes as structured JSON
@@ -54,7 +68,10 @@ export const generateRecipesAndImages = async (ingredients: string): Promise<Rec
         },
     });
     
-    const recipeData = JSON.parse(textResponse.text);
+    console.log("Raw AI text response:", textResponse.text); // For debugging
+    const cleanedJson = cleanJsonString(textResponse.text);
+    const recipeData = JSON.parse(cleanedJson);
+
 
     if (!recipeData.recipes || recipeData.recipes.length === 0) {
         throw new Error("AI tidak dapat membuat resep dari bahan tersebut.");
