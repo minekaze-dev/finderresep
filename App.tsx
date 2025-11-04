@@ -102,8 +102,8 @@ const App: React.FC = () => {
                 Masukkan bahan-bahan yang ada di kulkasmu, dan biarkan AI kami menciptakan resep lezat untukmu.
               </p>
 
-              <form onSubmit={handleSubmit} className="flex gap-2 items-start">
-                <div className="flex-grow flex flex-wrap items-center gap-2 p-2 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-dark-card focus-within:ring-2 focus-within:ring-light-accent dark:focus-within:ring-dark-accent transition-shadow">
+              <form onSubmit={handleSubmit} className="flex flex-col md:flex-row gap-4 md:gap-2 md:items-start">
+                <div className="flex-grow w-full flex flex-wrap items-center gap-2 p-2 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-dark-card focus-within:ring-2 focus-within:ring-light-accent dark:focus-within:ring-dark-accent transition-shadow">
                    {ingredients.map((ingredient, index) => (
                     <div key={index} className="flex items-center gap-2 bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-full pl-3 pr-1 py-1 text-sm font-medium animate-scale-in">
                       <span className="capitalize">{ingredient}</span>
@@ -129,7 +129,7 @@ const App: React.FC = () => {
                 </div>
                 <button
                   type="submit"
-                  className="flex-shrink-0 bg-light-accent dark:bg-dark-accent text-gray-900 dark:text-black font-bold py-4 px-8 rounded-xl hover:opacity-90 transition-opacity duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full md:w-auto flex-shrink-0 bg-light-accent dark:bg-dark-accent text-gray-900 dark:text-black font-bold py-3 md:py-4 px-8 rounded-xl hover:opacity-90 transition-opacity duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                   disabled={isLoading || ingredients.length === 0}
                 >
                   Buat Resep AI
