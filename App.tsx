@@ -102,7 +102,7 @@ const App: React.FC = () => {
                 Masukkan bahan-bahan yang ada di kulkasmu, dan biarkan AI kami menciptakan resep lezat untukmu.
               </p>
 
-              <form onSubmit={handleSubmit} className="flex gap-2">
+              <form onSubmit={handleSubmit} className="flex gap-2 items-start">
                 <div className="flex-grow flex flex-wrap items-center gap-2 p-2 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-dark-card focus-within:ring-2 focus-within:ring-light-accent dark:focus-within:ring-dark-accent transition-shadow">
                    {ingredients.map((ingredient, index) => (
                     <div key={index} className="flex items-center gap-2 bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-full pl-3 pr-1 py-1 text-sm font-medium animate-scale-in">
