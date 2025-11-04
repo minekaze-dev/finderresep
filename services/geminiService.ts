@@ -17,7 +17,7 @@ const recipeSchema = {
     ingredients: {
       type: Type.ARRAY,
       items: { type: Type.STRING },
-      description: 'Daftar bahan yang dibutuhkan dalam Bahasa Indonesia. Daftar ini HANYA boleh berisi bahan-bahan yang diberikan oleh pengguna.'
+      description: 'Daftar semua bahan yang dibutuhkan dalam Bahasa Indonesia, termasuk bahan utama dari pengguna dan bumbu dasar tambahan yang mungkin Anda gunakan (seperti garam, gula, saus).'
     },
     steps: {
       type: Type.ARRAY,
@@ -61,7 +61,7 @@ export const generateRecipesAndImages = async (ingredients: string): Promise<Rec
     // 1. Generate two recipes as structured JSON
     const textResponse = await ai.models.generateContent({
         model: 'gemini-2.5-flash',
-        contents: `Buatkan dua resep unik yang HANYA menggunakan bahan-bahan berikut: ${ingredients}. Penting: Jangan menambahkan bahan lain di luar daftar ini, termasuk bumbu dasar seperti garam, lada, atau minyak, kecuali jika sudah ada dalam daftar. Resep harus 100% dibuat dari bahan yang diberikan. Ikuti skema JSON yang diberikan.`,
+        contents: `Buatkan dua resep unik yang bahan utamanya HANYA berasal dari daftar berikut: ${ingredients}. Anda diizinkan menambahkan bumbu dasar umum seperti air, garam, merica, gula, micin (MSG), saus, atau minyak goreng secukupnya untuk menyempurnakan rasa, meskipun tidak ada dalam daftar. Namun, jangan menambahkan bahan makanan utama lainnya (seperti sayuran, daging, atau karbohidrat lain) yang tidak ada dalam daftar. Pastikan semua bahan yang digunakan, termasuk bumbu tambahan, tercantum dalam daftar bahan resep. Ikuti skema JSON yang diberikan.`,
         config: {
             responseMimeType: "application/json",
             responseSchema: twoRecipesSchema,
