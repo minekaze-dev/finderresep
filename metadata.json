@@ -1,0 +1,5 @@
+{
+  "name": "Finder Resep",
+  "description": "A SaaS web application that uses AI to generate recipes and food images from leftover ingredients provided by the user. Features a clean UI with light and dark modes.",
+  "requestFramePermissions": []
+}
