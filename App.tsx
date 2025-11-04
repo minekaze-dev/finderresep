@@ -4,6 +4,7 @@ import Header from './components/Header';
 import RecipeCard from './components/RecipeCard';
 import RecipeModal from './components/RecipeModal';
 import { generateRecipesAndImages } from './services/geminiService';
+import { findRecipesByIngredients, saveRecipes } from './services/supabaseService';
 import type { Recipe } from './types';
 
 const App: React.FC = () => {
@@ -13,6 +14,7 @@ const App: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
+  const [recipeSource, setRecipeSource] = useState<'ai' | 'cache' | null>(null);
 
   const suggestions = ['nasi', 'telur', 'kecap', 'ayam', 'mentega', 'santan', 'tempe', 'tahu', 'bawang merah', 'bawang putih', 'cabai'];
 
@@ -47,11 +49,26 @@ const App: React.FC = () => {
     setIsLoading(true);
     setError(null);
     setRecipes([]);
+    setRecipeSource(null);
 
     try {
-      const ingredientsString = ingredients.join(', ');
-      const generatedRecipes = await generateRecipesAndImages(ingredientsString);
-      setRecipes(generatedRecipes);
+      // 1. Check cache first
+      const cachedRecipes = await findRecipesByIngredients(ingredients);
+      if (cachedRecipes) {
+        setRecipes(cachedRecipes);
+        setRecipeSource('cache');
+        console.log("Recipes loaded from cache.");
+      } else {
+        // 2. If not in cache, generate new recipes
+        console.log("No cache hit. Generating new recipes with AI.");
+        const ingredientsString = ingredients.join(', ');
+        const generatedRecipes = await generateRecipesAndImages(ingredientsString);
+        setRecipes(generatedRecipes);
+        setRecipeSource('ai');
+        
+        // 3. Save the new recipes to the cache
+        await saveRecipes(ingredients, generatedRecipes);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Terjadi kesalahan yang tidak diketahui.");
     } finally {
@@ -68,6 +85,7 @@ const App: React.FC = () => {
     setIngredients([]);
     setInputValue('');
     setError(null);
+    setRecipeSource(null);
   };
 
   return (
@@ -139,38 +157,48 @@ const App: React.FC = () => {
               {isLoading && (
                 <div className="text-center">
                   <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-light-accent dark:border-dark-accent mx-auto"></div>
-                  <p className="mt-4 text-lg">AI sedang meracik resep spesial untukmu...</p>
+                  <p className="mt-4 text-lg">Mencari resep terbaik untukmu...</p>
                 </div>
               )}
 
               {recipes.length > 0 && !isLoading && (
                 <>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    {recipes.map((recipe, index) => (
-                      <RecipeCard 
-                        key={index} 
-                        recipe={recipe}
-                        onView={() => setSelectedRecipe(recipe)}
-                      />
-                    ))}
-                  </div>
-
-                  <div className="text-center mt-12">
-                    <button
+                  <div className="text-center mb-8 animate-fade-in">
+                    {recipeSource === 'cache' && (
+                      <p className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 p-3 rounded-lg inline-flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-10.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                        </svg>
+                        <span>Resep ditemukan dari pencarian sebelumnya!</span>
+                      </p>
+                    )}
+                    {recipeSource === 'ai' && (
+                      <p className="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 p-3 rounded-lg inline-flex items-center gap-2">
+                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                           <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                         </svg>
+                        <span>Resep baru berhasil dibuat oleh AI!</span>
+                      </p>
+                    )}
+                    <h2 className="text-3xl font-bold mt-4 text-gray-900 dark:text-white">Hasil Pencarian</h2>
+                     <button
                       onClick={handleReset}
-                      className="bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-dark-text font-bold py-3 px-6 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors duration-300 flex items-center gap-2 mx-auto"
+                      className="mt-4 text-sm text-gray-500 dark:text-gray-400 hover:text-light-accent dark:hover:text-dark-accent underline"
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0011.664 0l3.181-3.183m-4.991-2.691V5.006h4.992" />
-                      </svg>
-                      <span>Mulai Lagi</span>
+                      Cari Resep Lain
                     </button>
+                  </div>
+                  <div className="grid md:grid-cols-2 gap-8 animate-fade-in">
+                    {recipes.map((recipe, index) => (
+                      <RecipeCard key={index} recipe={recipe} onView={() => setSelectedRecipe(recipe)} />
+                    ))}
                   </div>
                 </>
               )}
             </section>
           </main>
         </div>
+
         <RecipeModal recipe={selectedRecipe} onClose={() => setSelectedRecipe(null)} />
       </div>
     </ThemeProvider>
