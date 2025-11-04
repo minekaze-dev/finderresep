@@ -17,7 +17,7 @@ const recipeSchema = {
     ingredients: {
       type: Type.ARRAY,
       items: { type: Type.STRING },
-      description: 'Daftar semua bahan yang dibutuhkan dalam Bahasa Indonesia, termasuk bahan utama dari pengguna dan bumbu dasar tambahan yang mungkin Anda gunakan (seperti garam, gula, saus).'
+      description: 'Daftar semua bahan yang dibutuhkan dalam Bahasa Indonesia, termasuk bahan utama dari pengguna dan bumbu dasar tambahan dengan takaran yang jelas (contoh: 1 sdm garam, ½ sdt merica).'
     },
     steps: {
       type: Type.ARRAY,
@@ -61,7 +61,7 @@ export const generateRecipesAndImages = async (ingredients: string): Promise<Rec
     // 1. Generate two recipes as structured JSON
     const textResponse = await ai.models.generateContent({
         model: 'gemini-2.5-flash',
-        contents: `Buatkan dua resep unik yang bahan utamanya HANYA berasal dari daftar berikut: ${ingredients}. Anda diizinkan menambahkan bumbu dasar umum seperti air, garam, merica, gula, micin (MSG), saus, atau minyak goreng secukupnya untuk menyempurnakan rasa, meskipun tidak ada dalam daftar. Namun, jangan menambahkan bahan makanan utama lainnya (seperti sayuran, daging, atau karbohidrat lain) yang tidak ada dalam daftar. Pastikan semua bahan yang digunakan, termasuk bumbu tambahan, tercantum dalam daftar bahan resep. Ikuti skema JSON yang diberikan.`,
+        contents: `Buatkan dua resep unik yang bahan utamanya HANYA berasal dari daftar berikut: ${ingredients}. Anda diizinkan menambahkan bumbu dasar umum seperti air, garam, merica, gula, micin (MSG), saus, atau minyak goreng secukupnya untuk menyempurnakan rasa, meskipun tidak ada dalam daftar. Namun, jangan menambahkan bahan makanan utama lainnya (seperti sayuran, daging, atau karbohidrat lain) yang tidak ada dalam daftar. Pastikan semua bahan yang digunakan, termasuk bumbu tambahan, tercantum dalam daftar bahan resep LENGKAP DENGAN TAKARANNYA (contoh: 1 sdm garam, 2 sdm minyak goreng). Ikuti skema JSON yang diberikan.`,
         config: {
             responseMimeType: "application/json",
             responseSchema: twoRecipesSchema,
